@@ -1,0 +1,11 @@
+---
+# defaults file for coffeesprout.ks-oemdrv
+
+ks_oemdrv_name: "custom"
+ks_oemdrv_dest: "{{ iso_workdir }}/OEMDRV-{{ ks_oemdrv_name }}.iso"
+ks_oemdrv_ks_dest: "{{ iso_workdir }}/ks.cfg"
+iso_workdir: "{{ playbook_dir }}/files/isos"
+ks_oemdrv_template: ks.basic.j2
+
+ks_oemdrv_packages:
+- genisoimage

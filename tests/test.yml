@@ -1,0 +1,14 @@
+---
+# To run a basic kickstart in Proxmox we create the custom iso in the local iso storage
+# Installation is done by creating a VM with the created iso
+- hosts: neptune
+  pre_tasks:
+  - name: borrow a simple kickstart from our good friend Geerlingguy <3
+    get_url:
+      url: https://raw.githubusercontent.com/geerlingguy/packer-boxes/master/rockylinux8/http/ks.cfg
+      dest: "/tmp/geerlingguy.ks.j2"
+    delegate_to: localhost
+  roles:
+  - role: coffeesprout.ks-oemdrv
+    iso_workdir: "/var/lib/vz/template/iso/"
+    ks_oemdrv_template: "/tmp/geerlingguy.ks.j2"

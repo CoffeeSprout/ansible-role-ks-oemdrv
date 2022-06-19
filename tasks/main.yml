@@ -1,0 +1,19 @@
+---
+# tasks file for coffeesprout.ks-oemdrv
+  
+  - name: ensure mkisofs is installed
+    package:
+      name: "{{ ks_oemdrv_packages }}"
+      state: present
+  - name: ensure iso_workdir
+    file:
+      path: "{{ iso_workdir }}"
+      state: directory
+  - name: template kickstart file
+    template:
+      src: "{{ ks_oemdrv_template }}"
+      dest: "{{ ks_oemdrv_ks_dest }}"
+  - name: create OEMDRV iso
+    command: "mkisofs -V OEMDRV -o {{ ks_oemdrv_dest }} {{ ks_oemdrv_ks_dest }}"
+    args:
+      creates: "{{ ks_oemdrv_dest }}"
