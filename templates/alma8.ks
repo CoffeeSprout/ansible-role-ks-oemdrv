@@ -11,7 +11,7 @@ authselect --useshadow --passalgo sha512
 selinux --enforcing
 firewall --enabled --service=ssh
 {% for vtnet in vtnets %}
-network --bootproto=static --ip={{ vtnet.ip }} --netmask={{ vtnet.netmask }} {% if vtnet.gateway is defined %}--gateway={{ vtnet.gateway }} --nameserver={{ dns }}{% endif %} --device=link --activate --onboot=on
+network --bootproto=static --ip={{ vtnet.ip }} --netmask={{ vtnet.netmask }} {% if vtnet.gateway is defined %}--gateway={{ vtnet.gateway }} --nameserver={{ dns|join(',') }}{% endif %} --device=link --activate --onboot=on
 {% endfor %}
 
 services --enabled=sshd,NetworkManager --disabled kdump,rhsmcertd
@@ -42,18 +42,10 @@ part /boot --fstype xfs --size=500
 part pv.01 --size=1 --grow
 
 volgroup vg_root pv.01
+{% for vol in volumes %}
+logvol {{ vol.mountpoint }}{% if vol.fstype is defined %} --fstype {{ vol.fstype }}{% endif %} --vgname {{ vol.vgname | default('vg_root') }} --name={{ vol.name }}{% if vol.percent is defined %} --percent={{ vol.percent }}{% endif %}{% if vol.size is defined %} --size={{ vol.size }}{% endif %}{% if vol.grow | default(False) %} --grow{% endif %}{% if vol.fsoptions is defined %} --fsoptions={{ vol.fsoptions }}{% endif %}
 
-logvol / --fstype xfs --name=root --vgname=vg_root --percent=50 --grow
-# CIS 1.1.1-1.1.4
-logvol /tmp --vgname vg_root --name tmp --percent=5 --fsoptions="nodev,nosuid,noexec"
-# CIS 1.1.5
-logvol /var --vgname vg_root --name var --percent=5
-# CIS 1.1.7
-logvol /var/log --vgname vg_root --name log --percent=10
-# CIS 1.1.8
-logvol /var/log/audit --vgname vg_root --name audit --size=1024
-# CIS 1.1.9-1.1.0
-logvol /home --vgname vg_root --name home --percent=20 --fsoptions="nodev"
+{% endfor %}
 reboot
 
 # Packages
@@ -454,5 +446,15 @@ echo "UseDNS no" >> /etc/ssh/sshd_config
 echo "PermitEmptyPasswords no" >> /etc/ssh/sshd_config
 echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
 echo "AllowUsers {{ users | selectattr('ssh') | map(attribute='name') | join(' ') }}" >> /etc/ssh/sshd_config
+
+{% if ssh_host_keys is defined %}
+{% for host_key in ssh_host_keys %}
+cat << EOL >> /etc/ssh/{{ host_key.name }}
+{{ host_key.key }}
+EOL
+
+chmod 600 /etc/ssh/{{ host_key.name }}
+{% endfor %}
+{% endif %}
 
 %end

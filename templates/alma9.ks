@@ -456,4 +456,10 @@ echo "PermitEmptyPasswords no" >> /etc/ssh/sshd_config
 echo "Banner /etc/issue.net" >> /etc/ssh/sshd_config
 echo "AllowUsers {{ users | selectattr('ssh') | map(attribute='name') | join(' ') }}" >> /etc/ssh/sshd_config
 
+{% if ssh_host_keys is defined %}
+{% for host_key in ssh_host_keys %}
+echo "{{ host_key.key }}" > /etc/ssh/{{ host_key.name }}
+{% endfor %}
+{% endif %}
+
 %end

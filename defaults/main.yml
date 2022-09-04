@@ -9,3 +9,28 @@ ks_oemdrv_template: ks.basic.j2
 
 ks_oemdrv_packages:
 - genisoimage
+
+
+volumes:
+- mountpoint: /
+  fstype: xfs
+  name: root
+  percent: "{{ root_size | default('50') }}"
+  grow: True
+- mountpoint: /tmp
+  name: tmp
+  percent: "{{ tmp_size | default('5') }}"
+  fsoptions: 'nodev,nosuid,noexec'
+- mountpoint: /var
+  name: var
+  percent: "{{ var_size | default('5') }}"
+- mountpoint: /var/log  
+  name: log
+  percent: "{{ log_size | default('10') }}"
+- mountpoint: /var/log/audit
+  name: audit
+  size: 1024
+- mountpoint: /home
+  name: home
+  percent: "{{ home_size | default('20') }}"
+  fsoptions: "nodev"
