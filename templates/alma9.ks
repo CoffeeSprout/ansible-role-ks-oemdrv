@@ -38,7 +38,7 @@ sshkey --username={{ user.name }} "{{ lookup('file', user.name+'.pub') | replace
 
 part biosboot  --size=1   --fstype=biosboot
 part /boot/efi --size=250 --fstype=efi
-part /boot --fstype xfs --size=500
+part /boot --fstype xfs --size=1024
 part pv.01 --size=1 --grow
 
 volgroup vg_root pv.01
